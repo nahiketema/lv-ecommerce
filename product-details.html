@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - Louis Vuitton</title>
+    
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/product.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">LOUIS VUITTON</a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop</a></li>
+                <li><a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a></li>
+                <li><a href="login.html" id="authLink">Login</a></li>
+                <li><a href="#" id="logoutLink" style="display: none;">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Product Details Section -->
+    <section class="product-details">
+        <div class="container">
+            <!-- Loading State -->
+            <div id="loadingMessage" class="loading">Loading product details...</div>
+            
+            <!-- Product Container -->
+            <div class="product-container" id="productContainer" style="display: none;">
+                <!-- Product Image -->
+                <div class="product-image-section">
+                    <img id="productImage" src="" alt="" class="product-main-image">
+                </div>
+                
+                <!-- Product Info -->
+                <div class="product-info-section">
+                    <span id="productCategory" class="product-category-tag"></span>
+                    <h1 id="productName" class="product-title"></h1>
+                    <p id="productPrice" class="product-price-display"></p>
+                    <p id="productDescription" class="product-description"></p>
+                    
+                    <!-- Success Message -->
+                    <div id="successMessage" class="success-message"></div>
+                    
+                    <!-- Quantity Selector -->
+                    <div class="quantity-section">
+                        <label class="quantity-label">Quantity:</label>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="decreaseQuantity()">-</button>
+                            <input type="number" id="quantity" class="quantity-input" value="1" min="1" readonly>
+                            <button class="quantity-btn" onclick="increaseQuantity()">+</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Add to Cart Button -->
+                    <button class="btn add-to-cart-btn" onclick="addToCart()">Add to Cart</button>
+                    <a href="shop.html" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">Continue Shopping</a>
+                    
+                    <!-- Product Features -->
+                    <div class="product-features">
+                        <h3>Product Features</h3>
+                        <ul>
+                            <li>Premium quality materials</li>
+                            <li>Handcrafted with precision</li>
+                            <li>Signature Louis Vuitton design</li>
+                            <li>Exclusive luxury finish</li>
+                            <li>Authentic guarantee included</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About Us</h3>
+                    <p>Louis Vuitton brings you the finest in luxury fashion, accessories, and cosmetics.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <p><a href="shop.html">Shop All</a></p>
+                    <p><a href="cart.html">Shopping Cart</a></p>
+                    <p><a href="login.html">My Account</a></p>
+                </div>
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <p><a href="#">Contact Us</a></p>
+                    <p><a href="#">Shipping Information</a></p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <p>Instagram | Facebook | Twitter</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Louis Vuitton E-Commerce. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+    <script>
+        let currentProduct = null;
+
+        // Load product on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+            
+            if (productId) {
+                loadProduct(productId);
+            } else {
+                document.getElementById('loadingMessage').innerHTML = 
+                    '<p style="color: red;">No product specified. <a href="shop.html">Return to shop</a></p>';
+            }
+            
+            updateCartCount();
+            checkUserSession();
+        });
+
+        // Load product details
+        async function loadProduct(productId) {
+            try {
+                const response = await fetch(`php/products/get_product.php?id=${productId}`);
+                const data = await response.json();
+                
+                if (data.success && data.product) {
+                    currentProduct = data.product;
+                    displayProduct(data.product);
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    document.getElementById('productContainer').style.display = 'grid';
+                } else {
+                    document.getElementById('loadingMessage').innerHTML = 
+                        '<p style="color: red;">Product not found. <a href="shop.html">Return to shop</a></p>';
+                }
+            } catch (error) {
+                console.error('Error loading product:', error);
+                document.getElementById('loadingMessage').innerHTML = 
+                    '<p style="color: red;">Failed to load product. Please try again later.</p>';
+            }
+        }
+
+        // Display product details
+        function displayProduct(product) {
+            document.getElementById('productImage').src = product.image_path;
+            document.getElementById('productImage').alt = product.name;
+            document.getElementById('productCategory').textContent = product.category;
+            document.getElementById('productName').textContent = product.name;
+            document.getElementById('productPrice').textContent = `$${parseFloat(product.price).toFixed(2)}`;
+            document.getElementById('productDescription').textContent = product.description;
+            document.title = `${product.name} - Louis Vuitton`;
+        }
+
+        // Quantity controls
+        function increaseQuantity() {
+            const quantityInput = document.getElementById('quantity');
+            quantityInput.value = parseInt(quantityInput.value) + 1;
+        }
+
+        function decreaseQuantity() {
+            const quantityInput = document.getElementById('quantity');
+            if (parseInt(quantityInput.value) > 1) {
+                quantityInput.value = parseInt(quantityInput.value) - 1;
+            }
+        }
+
+        // Add to cart function
+        async function addToCart() {
+            // Check if user is logged in
+            const userData = sessionStorage.getItem('user');
+            if (!userData) {
+                alert('Please login to add items to cart');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const quantity = parseInt(document.getElementById('quantity').value);
+            
+            try {
+                const formData = new FormData();
+                formData.append('product_id', currentProduct.id);
+                formData.append('quantity', quantity);
+                
+                const response = await fetch('php/cart/add_to_cart.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccessMessage('Added to cart successfully!');
+                    updateCartCount();
+                } else {
+                    alert(data.message || 'Failed to add to cart');
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        // Show success message
+        function showSuccessMessage(message) {
+            const successMsg = document.getElementById('successMessage');
+            successMsg.textContent = message;
+            successMsg.classList.add('show');
+            
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+            }, 3000);
+        }
+
+        // Check user session
+        function checkUserSession() {
+            const userData = sessionStorage.getItem('user');
+            if (userData) {
+                const user = JSON.parse(userData);
+                document.getElementById('authLink').textContent = user.name;
+                document.getElementById('authLink').href = user.role === 'admin' ? 'admin-dashboard.html' : '#';
+                document.getElementById('logoutLink').style.display = 'block';
+                
+                document.getElementById('logoutLink').addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    await fetch('php/auth/logout.php');
+                    sessionStorage.clear();
+                    window.location.reload();
+                });
+            }
+        }
+    </script>
+</body>
+</html>

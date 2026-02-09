@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Louis Vuitton</title>
+    
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/cart.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">LOUIS VUITTON</a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop</a></li>
+                <li><a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a></li>
+                <li><a href="login.html" id="authLink">Login</a></li>
+                <li><a href="#" id="logoutLink" style="display: none;">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Cart Container -->
+    <div class="cart-container">
+        <h1 class="cart-title">Shopping Cart</h1>
+        
+        <!-- Loading State -->
+        <div id="loadingMessage" class="loading">Loading your cart...</div>
+        
+        <!-- Empty Cart State -->
+        <div id="emptyCart" class="empty-cart" style="display: none;">
+            <h2>Your cart is empty</h2>
+            <p>Discover our luxury collection and add items to your cart</p>
+            <a href="shop.html" class="btn">Start Shopping</a>
+        </div>
+        
+        <!-- Cart Content -->
+        <div id="cartContent" class="cart-content" style="display: none;">
+            <!-- Cart Items -->
+            <div class="cart-items" id="cartItems">
+                <!-- Cart items will be loaded here dynamically -->
+            </div>
+            
+            <!-- Cart Summary -->
+            <div class="cart-summary">
+                <h3>Order Summary</h3>
+                <div class="summary-row">
+                    <span class="summary-label">Subtotal:</span>
+                    <span class="summary-value" id="subtotal">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Shipping:</span>
+                    <span class="summary-value">FREE</span>
+                </div>
+                <hr class="summary-divider">
+                <div class="summary-total">
+                    <span class="summary-label">Total:</span>
+                    <span class="summary-value" id="total">$0.00</span>
+                </div>
+                <a href="checkout.html" class="btn checkout-btn">Proceed to Checkout</a>
+                <a href="shop.html" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">Continue Shopping</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About Us</h3>
+                    <p>Louis Vuitton brings you the finest in luxury fashion, accessories, and cosmetics.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <p><a href="shop.html">Shop All</a></p>
+                    <p><a href="cart.html">Shopping Cart</a></p>
+                    <p><a href="login.html">My Account</a></p>
+                </div>
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <p><a href="#">Contact Us</a></p>
+                    <p><a href="#">Shipping Information</a></p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <p>Instagram | Facebook | Twitter</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Louis Vuitton E-Commerce. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+    <script src="js/cart.js"></script>
+    <script>
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const userData = sessionStorage.getItem('user');
+            if (!userData) {
+                alert('Please login to view your cart');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            loadCart();
+            checkUserSession();
+        });
+
+        // Load cart items
+        async function loadCart() {
+            try {
+                const response = await fetch('php/cart/get_cart.php');
+                const data = await response.json();
+                
+                document.getElementById('loadingMessage').style.display = 'none';
+                
+                if (data.success && data.cart_items.length > 0) {
+                    displayCart(data.cart_items, data.total);
+                    document.getElementById('cartContent').style.display = 'grid';
+                } else {
+                    document.getElementById('emptyCart').style.display = 'block';
+                }
+                
+                updateCartCount();
+            } catch (error) {
+                console.error('Error loading cart:', error);
+                document.getElementById('loadingMessage').innerHTML = 
+                    '<p style="color: red;">Failed to load cart. Please try again.</p>';
+            }
+        }
+
+        // Display cart items
+        function displayCart(items, total) {
+            const container = document.getElementById('cartItems');
+            container.innerHTML = '';
+            
+            items.forEach(item => {
+                const cartItem = `
+                    <div class="cart-item fade-in">
+                        <img src="${item.image_path}" alt="${item.name}" class="cart-item-image">
+                        <div class="cart-item-details">
+                            <h3 class="cart-item-name">${item.name}</h3>
+                            <p class="cart-item-category">${item.category}</p>
+                            <p class="cart-item-price">$${parseFloat(item.price).toFixed(2)} each</p>
+                        </div>
+                        <div class="cart-item-controls">
+                            <div class="cart-quantity-controls">
+                                <button class="cart-qty-btn" onclick="updateQuantity(${item.cart_id}, ${item.quantity - 1})">-</button>
+                                <span class="cart-qty-display">${item.quantity}</span>
+                                <button class="cart-qty-btn" onclick="updateQuantity(${item.cart_id}, ${item.quantity + 1})">+</button>
+                            </div>
+                            <button class="remove-btn" onclick="removeItem(${item.cart_id})">Remove</button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cartItem;
+            });
+            
+            // Update totals
+            document.getElementById('subtotal').textContent = `$${parseFloat(total).toFixed(2)}`;
+            document.getElementById('total').textContent = `$${parseFloat(total).toFixed(2)}`;
+        }
+
+        // Update cart item quantity
+        async function updateQuantity(cartId, newQuantity) {
+            if (newQuantity < 1) return;
+            
+            try {
+                const formData = new FormData();
+                formData.append('cart_id', cartId);
+                formData.append('quantity', newQuantity);
+                
+                const response = await fetch('php/cart/update_cart.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadCart(); // Reload cart
+                } else {
+                    alert(data.message || 'Failed to update cart');
+                }
+            } catch (error) {
+                console.error('Error updating cart:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        // Remove item from cart
+        async function removeItem(cartId) {
+            if (!confirm('Remove this item from cart?')) return;
+            
+            try {
+                const formData = new FormData();
+                formData.append('cart_id', cartId);
+                
+                const response = await fetch('php/cart/remove_from_cart.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadCart(); // Reload cart
+                } else {
+                    alert(data.message || 'Failed to remove item');
+                }
+            } catch (error) {
+                console.error('Error removing item:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        // Check user session
+        function checkUserSession() {
+            const userData = sessionStorage.getItem('user');
+            if (userData) {
+                const user = JSON.parse(userData);
+                document.getElementById('authLink').textContent = user.name;
+                document.getElementById('authLink').href = user.role === 'admin' ? 'admin-dashboard.html' : '#';
+                document.getElementById('logoutLink').style.display = 'block';
+                
+                document.getElementById('logoutLink').addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    await fetch('php/auth/logout.php');
+                    sessionStorage.clear();
+                    window.location.href = 'index.html';
+                });
+            }
+        }
+    </script>
+</body>
+</html>

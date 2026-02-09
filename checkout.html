@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Louis Vuitton</title>
+    
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/cart.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">LOUIS VUITTON</a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop</a></li>
+                <li><a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a></li>
+                <li><a href="login.html" id="authLink">Login</a></li>
+                <li><a href="#" id="logoutLink" style="display: none;">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Checkout Container -->
+    <div class="checkout-container">
+        <h1 class="cart-title">Checkout</h1>
+        
+        <!-- Order Success Message -->
+        <div id="orderSuccess" class="order-success">
+            <h2>✓ Order Placed Successfully!</h2>
+            <p>Thank you for your purchase. Your order has been confirmed.</p>
+            <p class="order-id">Order ID: <span id="orderIdDisplay"></span></p>
+            <a href="shop.html" class="btn" style="margin-top: 1.5rem;">Continue Shopping</a>
+        </div>
+        
+        <!-- Checkout Form -->
+        <form id="checkoutForm" class="checkout-form">
+            <!-- Order Summary -->
+            <div class="order-summary">
+                <h4>Order Summary</h4>
+                <div id="orderItems">
+                    <!-- Order items will be loaded here -->
+                </div>
+                <hr style="margin: 1rem 0;">
+                <div class="order-item" style="font-weight: 700; font-size: 1.2rem; color: var(--gold);">
+                    <span>Total:</span>
+                    <span id="checkoutTotal">$0.00</span>
+                </div>
+            </div>
+            
+            <!-- Shipping Information -->
+            <div class="form-section">
+                <h3>Shipping Information</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" id="fullName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number *</label>
+                        <input type="tel" id="phone" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Street Address *</label>
+                    <input type="text" id="street" class="form-control" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>City *</label>
+                        <input type="text" id="city" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Postal Code *</label>
+                        <input type="text" id="postal" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Country *</label>
+                    <input type="text" id="country" class="form-control" required>
+                </div>
+            </div>
+            
+            <!-- Payment Information (Mock) -->
+            <div class="form-section">
+                <h3>Payment Information</h3>
+                <p style="color: #666; font-size: 0.95rem; margin-bottom: 1.5rem;">
+                    <strong>Note:</strong> This is a demonstration. No actual payment will be processed.
+                </p>
+                <div class="form-group">
+                    <label>Card Number *</label>
+                    <input type="text" id="cardNumber" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Expiry Date *</label>
+                        <input type="text" id="expiry" class="form-control" placeholder="MM/YY" maxlength="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label>CVV *</label>
+                        <input type="text" id="cvv" class="form-control" placeholder="123" maxlength="3" required>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" class="btn" style="width: 100%; padding: 1.25rem; font-size: 1.1rem;">
+                Place Order
+            </button>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About Us</h3>
+                    <p>Louis Vuitton brings you the finest in luxury fashion, accessories, and cosmetics.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <p><a href="shop.html">Shop All</a></p>
+                    <p><a href="cart.html">Shopping Cart</a></p>
+                </div>
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <p><a href="#">Contact Us</a></p>
+                    <p><a href="#">Shipping Information</a></p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <p>Instagram | Facebook | Twitter</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Louis Vuitton E-Commerce. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+    <script>
+        let cartTotal = 0;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const userData = sessionStorage.getItem('user');
+            if (!userData) {
+                alert('Please login to checkout');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            loadOrderSummary();
+            setupCheckoutForm();
+            updateCartCount();
+            checkUserSession();
+        });
+
+        // Load order summary
+        async function loadOrderSummary() {
+            try {
+                const response = await fetch('php/cart/get_cart.php');
+                const data = await response.json();
+                
+                if (data.success && data.cart_items.length > 0) {
+                    displayOrderSummary(data.cart_items, data.total);
+                    cartTotal = parseFloat(data.total);
+                } else {
+                    alert('Your cart is empty');
+                    window.location.href = 'cart.html';
+                }
+            } catch (error) {
+                console.error('Error loading cart:', error);
+                alert('Failed to load cart. Please try again.');
+            }
+        }
+
+        // Display order summary
+        function displayOrderSummary(items, total) {
+            const container = document.getElementById('orderItems');
+            container.innerHTML = '';
+            
+            items.forEach(item => {
+                const orderItem = `
+                    <div class="order-item">
+                        <span>${item.name} (x${item.quantity})</span>
+                        <span>$${parseFloat(item.subtotal).toFixed(2)}</span>
+                    </div>
+                `;
+                container.innerHTML += orderItem;
+            });
+            
+            document.getElementById('checkoutTotal').textContent = `$${parseFloat(total).toFixed(2)}`;
+        }
+
+        // Setup checkout form submission
+        function setupCheckoutForm() {
+            const form = document.getElementById('checkoutForm');
+            
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Get shipping address
+                const shippingAddress = `
+                    ${document.getElementById('fullName').value}
+                    ${document.getElementById('phone').value}
+                    ${document.getElementById('street').value}
+                    ${document.getElementById('city').value}, ${document.getElementById('postal').value}
+                    ${document.getElementById('country').value}
+                `.trim().replace(/\s+/g, ' ');
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('shipping_address', shippingAddress);
+                    
+                    const response = await fetch('php/orders/place_order.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Show success message
+                        document.getElementById('orderIdDisplay').textContent = data.order_id;
+                        document.getElementById('orderSuccess').classList.add('show');
+                        document.getElementById('checkoutForm').style.display = 'none';
+                        
+                        // Update cart count
+                        updateCartCount();
+                        
+                        // Scroll to top
+                        window.scrollTo(0, 0);
+                    } else {
+                        alert(data.message || 'Failed to place order');
+                    }
+                } catch (error) {
+                    console.error('Error placing order:', error);
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        }
+
+        // Check user session
+        function checkUserSession() {
+            const userData = sessionStorage.getItem('user');
+            if (userData) {
+                const user = JSON.parse(userData);
+                document.getElementById('authLink').textContent = user.name;
+                document.getElementById('authLink').href = user.role === 'admin' ? 'admin-dashboard.html' : '#';
+                document.getElementById('logoutLink').style.display = 'block';
+                
+                // Pre-fill name if available
+                document.getElementById('fullName').value = user.name;
+                
+                document.getElementById('logoutLink').addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    await fetch('php/auth/logout.php');
+                    sessionStorage.clear();
+                    window.location.href = 'index.html';
+                });
+            }
+        }
+    </script>
+</body>
+</html>

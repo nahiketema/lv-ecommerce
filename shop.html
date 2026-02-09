@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop - Louis Vuitton</title>
+    
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/shop.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">LOUIS VUITTON</a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop</a></li>
+                <li><a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a></li>
+                <li><a href="login.html" id="authLink">Login</a></li>
+                <li><a href="#" id="logoutLink" style="display: none;">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Category Filter Section -->
+    <section class="filter-section">
+        <div class="filter-container">
+            <span class="filter-label">Filter by Category:</span>
+            <button class="filter-btn active" data-category="">All Products</button>
+            <button class="filter-btn" data-category="Clothing">Clothing</button>
+            <button class="filter-btn" data-category="Accessories">Accessories</button>
+            <button class="filter-btn" data-category="Cosmetics">Cosmetics</button>
+        </div>
+    </section>
+
+    <!-- Shop Section -->
+    <section class="section shop-container">
+        <div class="container">
+            <h2 class="section-title">Luxury Collection</h2>
+            
+            <!-- Products Count -->
+            <p class="products-count" id="productsCount">Loading products...</p>
+            
+            <!-- Loading State -->
+            <div id="loadingMessage" class="loading">Curating luxury items...</div>
+            
+            <!-- Products Grid -->
+            <div class="product-grid" id="productsGrid">
+                <!-- Products will be loaded here dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About Us</h3>
+                    <p>Louis Vuitton brings you the finest in luxury fashion, accessories, and cosmetics. Experience timeless elegance.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <p><a href="shop.html">Shop All</a></p>
+                    <p><a href="cart.html">Shopping Cart</a></p>
+                    <p><a href="login.html">My Account</a></p>
+                </div>
+                <div class="footer-section">
+                    <h3>Customer Service</h3>
+                    <p><a href="#">Contact Us</a></p>
+                    <p><a href="#">Shipping Information</a></p>
+                    <p><a href="#">Returns & Exchanges</a></p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <p>Instagram | Facebook | Twitter</p>
+                    <p>Stay connected for exclusive offers</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Louis Vuitton E-Commerce. All rights reserved. | Conceptual Academic Project</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+    <script src="js/shop.js"></script>
+    <script>
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts('');
+            setupFilterButtons();
+            updateCartCount();
+            checkUserSession();
+        });
+
+        // Load products based on category filter
+        async function loadProducts(category) {
+            try {
+                const url = category 
+                    ? `php/products/get_products.php?category=${encodeURIComponent(category)}`
+                    : 'php/products/get_products.php';
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                document.getElementById('loadingMessage').style.display = 'none';
+                
+                if (data.success && data.products.length > 0) {
+                    displayProducts(data.products);
+                    document.getElementById('productsCount').textContent = 
+                        `Showing ${data.count} luxury item${data.count !== 1 ? 's' : ''}`;
+                } else {
+                    document.getElementById('productsGrid').innerHTML = 
+                        '<div class="empty-state"><h3>No products found</h3><p>Try a different category</p></div>';
+                    document.getElementById('productsCount').textContent = 'No products found';
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+                document.getElementById('loadingMessage').innerHTML = 
+                    '<p style="color: red;">Failed to load products. Please try again later.</p>';
+            }
+        }
+
+        // Display products in grid
+        function displayProducts(products) {
+            const container = document.getElementById('productsGrid');
+            container.innerHTML = '';
+            
+            products.forEach(product => {
+                const productCard = `
+                    <div class="product-card fade-in" onclick="viewProduct(${product.id})">
+                        <img src="${product.image_path}" alt="${product.name}" class="product-image">
+                        <div class="product-info">
+                            <p class="product-category">${product.category}</p>
+                            <h3 class="product-name">${product.name}</h3>
+                            <p class="product-price">$${parseFloat(product.price).toFixed(2)}</p>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += productCard;
+            });
+        }
+
+        // Setup filter button click handlers
+        function setupFilterButtons() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Get category and load products
+                    const category = this.getAttribute('data-category');
+                    document.getElementById('loadingMessage').style.display = 'block';
+                    loadProducts(category);
+                });
+            });
+        }
+
+        // Navigate to product details
+        function viewProduct(productId) {
+            window.location.href = `product-details.html?id=${productId}`;
+        }
+
+        // Check user session
+        function checkUserSession() {
+            const userData = sessionStorage.getItem('user');
+            if (userData) {
+                const user = JSON.parse(userData);
+                document.getElementById('authLink').textContent = user.name;
+                document.getElementById('authLink').href = user.role === 'admin' ? 'admin-dashboard.html' : '#';
+                document.getElementById('logoutLink').style.display = 'block';
+                
+                document.getElementById('logoutLink').addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    await fetch('php/auth/logout.php');
+                    sessionStorage.clear();
+                    window.location.reload();
+                });
+            }
+        }
+    </script>
+</body>
+</html>

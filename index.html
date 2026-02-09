@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Louis Vuitton - Luxury Fashion & Accessories</title>
+
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="css/main.css" />
+  </head>
+  <body>
+    <!-- Navigation Header -->
+    <header class="header">
+      <nav class="nav-container">
+        <a href="index.html" class="logo">LOUIS VUITTON</a>
+        <ul class="nav-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="shop.html">Shop</a></li>
+          <li>
+            <a href="cart.html"
+              >Cart <span class="cart-count" id="cartCount">0</span></a
+            >
+          </li>
+          <li><a href="login.html" id="authLink">Login</a></li>
+          <li><a href="#" id="logoutLink" style="display: none">Logout</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Hero Section with Video Background -->
+    <section class="hero">
+      <!-- Video Background -->
+      <video class="hero-video" autoplay muted loop playsinline>
+        <source src="uploads/LV-vid.mp4" type="video/mp4">
+        <source src="uploads/LV-vid.webm" type="video/webm">
+        <!-- Fallback for browsers that don't support video -->
+      </video>
+      
+      <!-- Dark Overlay -->
+      <div class="hero-overlay"></div>
+      
+      <!-- Hero Content -->
+      <div class="hero-content">
+        <h1>Timeless Luxury</h1>
+        <p>
+          Discover the finest collection of haute couture, accessories, and
+          beauty
+        </p>
+        <a href="shop.html" class="btn">Explore Collection</a>
+      </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section class="section">
+      <div class="container">
+        <h2 class="section-title">Featured Collection</h2>
+
+        <!-- Loading State -->
+        <div id="loadingMessage" class="loading">Loading luxury items...</div>
+
+        <!-- Products Grid -->
+        <div class="product-grid" id="featuredProducts">
+          <!-- Products will be loaded here dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section" style="background-color: var(--light-gray)">
+      <div class="container">
+        <h2 class="section-title">The Art of Luxury</h2>
+        <div style="max-width: 800px; margin: 0 auto; text-align: center">
+          <p style="font-size: 1.15rem; line-height: 1.8; color: #333">
+            Since our foundation, we have been dedicated to creating exceptional
+            pieces that embody elegance, craftsmanship, and timeless style. Each
+            item in our collection represents the pinnacle of luxury fashion,
+            designed for those who appreciate the extraordinary.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h3>About Us</h3>
+            <p>
+              Louis Vuitton brings you the finest in luxury fashion,
+              accessories, and cosmetics. Experience timeless elegance.
+            </p>
+          </div>
+          <div class="footer-section">
+            <h3>Quick Links</h3>
+            <p><a href="shop.html">Shop All</a></p>
+            <p><a href="cart.html">Shopping Cart</a></p>
+            <p><a href="login.html">My Account</a></p>
+          </div>
+          <div class="footer-section">
+            <h3>Customer Service</h3>
+            <p><a href="#">Contact Us</a></p>
+            <p><a href="#">Shipping Information</a></p>
+            <p><a href="#">Returns & Exchanges</a></p>
+          </div>
+          <div class="footer-section">
+            <h3>Follow Us</h3>
+            <p>Instagram | Facebook | Twitter</p>
+            <p>Stay connected for exclusive offers</p>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>
+            &copy; 2024 Louis Vuitton E-Commerce. All rights reserved. |
+            Conceptual Academic Project
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+    <script>
+      // Load featured products on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        loadFeaturedProducts();
+        updateCartCount();
+        checkUserSession();
+      });
+
+      // Function to load featured products (limit to 4)
+      async function loadFeaturedProducts() {
+        try {
+          const response = await fetch("php/products/get_products.php");
+          const data = await response.json();
+
+          document.getElementById("loadingMessage").style.display = "none";
+
+          if (data.success && data.products.length > 0) {
+            // Take only first 4 products for featured section
+            const featuredItems = data.products.slice(0, 4);
+            displayProducts(featuredItems);
+          } else {
+            document.getElementById("featuredProducts").innerHTML =
+              '<p class="text-center">No products available at the moment.</p>';
+          }
+        } catch (error) {
+          console.error("Error loading products:", error);
+          document.getElementById("loadingMessage").innerHTML =
+            '<p style="color: red;">Failed to load products. Please try again later.</p>';
+        }
+      }
+
+      // Function to display products
+      function displayProducts(products) {
+        const container = document.getElementById("featuredProducts");
+        container.innerHTML = "";
+
+        products.forEach((product) => {
+          const productCard = `
+                    <div class="product-card fade-in" onclick="viewProduct(${
+                      product.id
+                    })">
+                        <img src="${product.image_path}" alt="${
+            product.name
+          }" class="product-image">
+                        <div class="product-info">
+                            <p class="product-category">${product.category}</p>
+                            <h3 class="product-name">${product.name}</h3>
+                            <p class="product-price">$${parseFloat(
+                              product.price
+                            ).toFixed(2)}</p>
+                        </div>
+                    </div>
+                `;
+          container.innerHTML += productCard;
+        });
+      }
+
+      // Navigate to product details
+      function viewProduct(productId) {
+        window.location.href = `product-details.html?id=${productId}`;
+      }
+
+      // Check user session and update UI
+      function checkUserSession() {
+        const userData = sessionStorage.getItem("user");
+        if (userData) {
+          const user = JSON.parse(userData);
+          document.getElementById("authLink").textContent = user.name;
+          document.getElementById("authLink").href =
+            user.role === "admin" ? "admin-dashboard.html" : "#";
+          document.getElementById("logoutLink").style.display = "block";
+
+          // Add logout functionality
+          document
+            .getElementById("logoutLink")
+            .addEventListener("click", async function (e) {
+              e.preventDefault();
+              await fetch("php/auth/logout.php");
+              sessionStorage.clear();
+              window.location.reload();
+            });
+        }
+      }
+    </script>
+  </body>
+</html>

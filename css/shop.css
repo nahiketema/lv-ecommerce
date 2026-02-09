@@ -1,0 +1,125 @@
+/**
+ * Shop Page CSS
+ * Styles for product listing and filter functionality
+ */
+
+/* Filter Section */
+.filter-section {
+    background-color: var(--light-gray);
+    padding: 2rem 0;
+    margin-bottom: 3rem;
+    border-bottom: 2px solid var(--gold);
+}
+
+.filter-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-label {
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.filter-btn {
+    padding: 0.7rem 1.75rem;
+    background-color: var(--white);
+    color: var(--black);
+    border: 2px solid var(--black);
+    cursor: pointer;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.filter-btn:hover {
+    background-color: var(--black);
+    color: var(--gold);
+    border-color: var(--black);
+}
+
+.filter-btn.active {
+    background-color: var(--gold);
+    color: var(--black);
+    border-color: var(--gold);
+}
+
+/* Shop Page Product Grid - Enhanced */
+.shop-container {
+    min-height: 500px;
+}
+
+.products-count {
+    text-align: center;
+    font-size: 0.95rem;
+    color: #666;
+    margin-bottom: 2rem;
+    font-style: italic;
+}
+
+/* Product Card Hover Effects */
+.product-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+    transition: left 0.5s ease;
+    z-index: 1;
+}
+
+.product-card:hover::before {
+    left: 100%;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+}
+
+.empty-state h3 {
+    font-size: 2rem;
+    color: #999;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* Loading State */
+.loading {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.25rem;
+    color: var(--gold);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .filter-container {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .filter-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+}
