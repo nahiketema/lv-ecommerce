@@ -52,9 +52,9 @@ lv-ecommerce/
 
 ## 🎬 Demo
 
-<video src="https://github.com/nahiketema/lv-ecommerce/raw/main/uploads/LV-Demo.mp4" controls="controls" style="max-width: 100%;">
-  Your browser does not support the video tag.
-</video>
+[![Watch the demo](https://raw.githubusercontent.com/nahiketema/lv-ecommerce/main/uploads/LV-Demo-Thumbnail.png)](https://github.com/nahiketema/lv-ecommerce/raw/main/uploads/LV-Demo.mp4)
+
+*Click on the image above to watch the demo video.*
 
 ## 📄 License
 
