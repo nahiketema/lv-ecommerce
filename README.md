@@ -54,7 +54,8 @@ lv-ecommerce/
 
 [![Watch the demo](https://img.youtube.com/vi/Hx_4S_KviNU/maxresdefault.jpg)](https://youtu.be/Hx_4S_KviNU)
 
-*Click on the image above to watch the demo video.*
+<video src="https://youtu.be/Hx_4S_KviNU" controls="controls" style="max-width: 100%;">
+</video>
 
 ## 📄 License
 
