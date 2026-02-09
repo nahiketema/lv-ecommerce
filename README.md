@@ -52,7 +52,7 @@ lv-ecommerce/
 
 ## 🎬 Demo
 
-[![Watch the demo](https://raw.githubusercontent.com/nahiketema/lv-ecommerce/main/uploads/LV-Demo-Thumbnail.png)](https://github.com/nahiketema/lv-ecommerce/raw/main/uploads/LV-Demo.mp4)
+[![Watch the demo](https://img.youtube.com/vi/Hx_4S_KviNU/maxresdefault.jpg)](https://youtu.be/Hx_4S_KviNU)
 
 *Click on the image above to watch the demo video.*
 
