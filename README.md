@@ -1,4 +1,4 @@
-# Louis Vuitton E-Commerce Platform 🛍️
+# Louis Vuitton E-Commerce Platform 
 
 A full-stack e-commerce application mimicking a luxury retail experience. Built with vanilla PHP, MySQL, and modern JavaScript (ES6+).
 
